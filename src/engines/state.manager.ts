@@ -19,6 +19,7 @@ const VALID_TRANSITIONS: Record<AgentState, AgentState[]> = {
     AgentState.GENERATING,
     AgentState.PLANNING_DETAILED, // if rejected, go back to planning
     AgentState.FAILED,
+    AgentState.DELETED, // allow deletion while waiting for approval
   ],
   [AgentState.GENERATING]: [AgentState.VALIDATING, AgentState.FAILED],
   [AgentState.VALIDATING]: [

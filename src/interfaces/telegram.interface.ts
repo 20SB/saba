@@ -153,9 +153,12 @@ I can help you create, manage, and monitor AI agents.
     const name = parts[0];
     const goal = parts.slice(1).join(" ");
 
+    const escapedName = this.escapeMarkdown(name);
+    const escapedGoal = this.escapeMarkdown(goal);
+
     await this.bot.sendMessage(
       chatId,
-      `✓ Agent creation request received:\n\n*Name:* ${name}\n*Goal:* ${goal}\n\nProcessing...`,
+      `✓ Agent creation request received:\n\n*Name:* ${escapedName}\n*Goal:* ${escapedGoal}\n\nProcessing...`,
       { parse_mode: "Markdown" }
     );
 
@@ -177,7 +180,8 @@ I can help you create, manage, and monitor AI agents.
       let message = "*All Agents:*\n\n";
       for (const agent of agents) {
         const progress = this.stateManager.getStateProgress(agent.status);
-        message += `📦 *${agent.name}*\n`;
+        const escapedName = this.escapeMarkdown(agent.name);
+        message += `📦 *${escapedName}*\n`;
         message += `   Status: ${agent.status} (${progress}%)\n`;
         message += `   Risk: ${agent.risk_level}\n`;
         message += `   Created: ${agent.created_at.toISOString()}\n\n`;

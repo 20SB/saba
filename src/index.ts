@@ -170,6 +170,14 @@ export class SABAOrchestrator {
     );
 
     try {
+      // Check if agent with same name already exists
+      const existingAgent = await this.memoryEngine.getAgentByName(request.name);
+      if (existingAgent) {
+        const errorMsg = `Agent with name "${request.name}" already exists. Please use a different name or delete the existing agent first.`;
+        await this.telegram.sendError(request.name, errorMsg);
+        throw new Error(errorMsg);
+      }
+
       // Stage 0: Request Intake
       const agent = await this.memoryEngine.createAgent(request);
       const agentId = agent.id;
