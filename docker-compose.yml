@@ -1,0 +1,77 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: saba-postgres
+    environment:
+      POSTGRES_DB: saba_db
+      POSTGRES_USER: saba
+      POSTGRES_PASSWORD: saba_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U saba"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - saba-network
+
+  saba:
+    build: .
+    container_name: saba
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      # Database
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: saba
+      DB_PASSWORD: saba_password
+      DB_NAME: saba_db
+
+      # Anthropic API
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+
+      # Telegram
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      TELEGRAM_ADMIN_CHAT_ID: ${TELEGRAM_ADMIN_CHAT_ID}
+
+      # Paths
+      AGENTS_BASE_PATH: /app/agents
+      LOGS_PATH: /app/logs
+      MEMORY_PATH: /app/memory
+
+      # Monitoring
+      HEALTH_CHECK_INTERVAL_MS: 60000
+      ALERT_ERROR_THRESHOLD: 10
+      ALERT_MEMORY_THRESHOLD_PERCENT: 90
+
+      # Deployment
+      DEFAULT_DEPLOYMENT_TARGET: docker
+      DOCKER_REGISTRY: localhost:5000
+
+      # Security
+      MAX_RETRY_ATTEMPTS: 3
+      APPROVAL_TIMEOUT_MS: 3600000
+    volumes:
+      - ./agents:/app/agents
+      - ./logs:/app/logs
+      - ./memory:/app/memory
+      - /var/run/docker.sock:/var/run/docker.sock  # For Docker-in-Docker
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    networks:
+      - saba-network
+
+volumes:
+  postgres_data:
+
+networks:
+  saba-network:
+    driver: bridge

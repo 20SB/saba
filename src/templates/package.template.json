@@ -1,0 +1,35 @@
+{
+  "name": "{{AGENT_NAME}}",
+  "version": "1.0.0",
+  "description": "{{AGENT_DESCRIPTION}}",
+  "main": "dist/brain.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/brain.js",
+    "dev": "ts-node src/brain.ts",
+    "test": "jest",
+    "lint": "tsc --noEmit"
+  },
+  "keywords": [
+    "agent",
+    "ai",
+    "automation"
+  ],
+  "author": "SABA",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "winston": "^3.11.0",
+    "uuid": "^9.0.1"{{ADDITIONAL_DEPENDENCIES}}
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3",
+    "jest": "^29.7.0",
+    "@types/jest": "^29.5.11"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
