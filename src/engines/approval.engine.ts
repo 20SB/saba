@@ -229,15 +229,20 @@ export class ApprovalEngine {
       return true;
     }
 
+    // Truncate long text to avoid Telegram message limits
+    const truncate = (text: string, maxLength: number = 200): string => {
+      return text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
+    };
+
     const details = `
-**Initial Plan:**
-- Purpose: ${plan.agent_purpose}
-- Capabilities: ${plan.core_capabilities.join(", ")}
-- Tools: ${plan.required_tools.join(", ")}
+Initial Plan:
+- Purpose: ${truncate(plan.agent_purpose, 150)}
+- Capabilities: ${plan.core_capabilities.slice(0, 3).join(", ")}${plan.core_capabilities.length > 3 ? "..." : ""}
+- Tools: ${plan.required_tools.slice(0, 3).join(", ")}${plan.required_tools.length > 3 ? "..." : ""}
 - Complexity: ${plan.estimated_complexity}
 - Risk Level: ${riskLevel}
 
-${plan.reasoning}
+Reasoning: ${truncate(plan.reasoning, 300)}
     `;
 
     const approvalId = await this.requestApproval(
@@ -270,18 +275,23 @@ ${plan.reasoning}
       return true;
     }
 
+    // Truncate long text to avoid Telegram message limits
+    const truncate = (text: string, maxLength: number = 200): string => {
+      return text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
+    };
+
     const details = `
-**Detailed Plan:**
-- Architecture: ${plan.architecture_design}
+Detailed Plan:
+- Architecture: ${truncate(plan.architecture_design, 150)}
 - Modules: ${plan.module_structure.length} modules
 - Tools: ${plan.tools_integration_plan.length} integrations
 - Storage: ${plan.memory_requirements.storage_backend}
 - Deployment: ${plan.deployment_strategy.target}
 - Monitoring: ${plan.monitoring_strategy.health_check_interval_ms}ms intervals
 
-**Security:**
-- Allowed Actions: ${plan.security_requirements.allowed_actions.join(", ")}
-- Approval Required: ${plan.security_requirements.approval_required_actions.join(", ")}
+Security:
+- Allowed Actions: ${plan.security_requirements.allowed_actions.slice(0, 5).join(", ")}${plan.security_requirements.allowed_actions.length > 5 ? "..." : ""}
+- Approval Required: ${plan.security_requirements.approval_required_actions.slice(0, 3).join(", ")}${plan.security_requirements.approval_required_actions.length > 3 ? "..." : ""}
     `;
 
     const approvalId = await this.requestApproval(

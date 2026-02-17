@@ -495,12 +495,18 @@ I can help you create, manage, and monitor AI agents.
     details: string
   ): Promise<string | undefined> {
     try {
+      // Escape Markdown special characters in dynamic content
+      const escapedDetails = this.escapeMarkdown(details);
+      const escapedAgentName = this.escapeMarkdown(agentName);
+
       const message = `
 🔔 *Approval Required*
 
-*Agent:* ${agentName}
+*Agent:* ${escapedAgentName}
 *Type:* ${approvalType}
-*Details:* ${details}
+
+*Details:*
+${escapedDetails}
 
 *Approval ID:* \`${approvalId}\`
 
@@ -530,12 +536,16 @@ Use /approve ${approvalId} or /reject ${approvalId}
 
   async sendStatusUpdate(agentName: string, status: string, details?: string): Promise<void> {
     try {
+      const escapedAgentName = this.escapeMarkdown(agentName);
+      const escapedStatus = this.escapeMarkdown(status);
+      const escapedDetails = details ? this.escapeMarkdown(details) : "";
+
       const message = `
 📊 *Status Update*
 
-*Agent:* ${agentName}
-*Status:* ${status}
-${details ? `\n${details}` : ""}
+*Agent:* ${escapedAgentName}
+*Status:* ${escapedStatus}
+${details ? `\n${escapedDetails}` : ""}
       `;
 
       await this.bot.sendMessage(this.adminChatId, message, {
@@ -548,11 +558,15 @@ ${details ? `\n${details}` : ""}
 
   async sendAlert(agentName: string, alertType: string, message: string): Promise<void> {
     try {
-      const alertMessage = `
-🚨 *Alert: ${alertType}*
+      const escapedAgentName = this.escapeMarkdown(agentName);
+      const escapedAlertType = this.escapeMarkdown(alertType);
+      const escapedMessage = this.escapeMarkdown(message);
 
-*Agent:* ${agentName}
-*Message:* ${message}
+      const alertMessage = `
+🚨 *Alert: ${escapedAlertType}*
+
+*Agent:* ${escapedAgentName}
+*Message:* ${escapedMessage}
       `;
 
       await this.bot.sendMessage(this.adminChatId, alertMessage, {
@@ -565,11 +579,14 @@ ${details ? `\n${details}` : ""}
 
   async sendError(agentName: string, errorMessage: string, errorStack?: string): Promise<void> {
     try {
+      const escapedAgentName = this.escapeMarkdown(agentName);
+      const escapedErrorMessage = this.escapeMarkdown(errorMessage);
+
       const message = `
 ❌ *Error*
 
-*Agent:* ${agentName}
-*Message:* ${errorMessage}
+*Agent:* ${escapedAgentName}
+*Message:* ${escapedErrorMessage}
 ${errorStack ? `\n\`\`\`\n${errorStack.slice(0, 500)}\n\`\`\`` : ""}
       `;
 
@@ -583,11 +600,14 @@ ${errorStack ? `\n\`\`\`\n${errorStack.slice(0, 500)}\n\`\`\`` : ""}
 
   async sendSuccess(agentName: string, message: string): Promise<void> {
     try {
+      const escapedAgentName = this.escapeMarkdown(agentName);
+      const escapedMessage = this.escapeMarkdown(message);
+
       const successMessage = `
 ✅ *Success*
 
-*Agent:* ${agentName}
-*Message:* ${message}
+*Agent:* ${escapedAgentName}
+*Message:* ${escapedMessage}
       `;
 
       await this.bot.sendMessage(this.adminChatId, successMessage, {
@@ -596,6 +616,31 @@ ${errorStack ? `\n\`\`\`\n${errorStack.slice(0, 500)}\n\`\`\`` : ""}
     } catch (error) {
       await this.logger.error("Error sending success notification", error instanceof Error ? error : undefined);
     }
+  }
+
+  // Helper method to escape Markdown special characters
+  private escapeMarkdown(text: string): string {
+    // Escape special Markdown characters
+    return text
+      .replace(/\\/g, "\\\\")
+      .replace(/\*/g, "\\*")
+      .replace(/_/g, "\\_")
+      .replace(/\[/g, "\\[")
+      .replace(/\]/g, "\\]")
+      .replace(/\(/g, "\\(")
+      .replace(/\)/g, "\\)")
+      .replace(/~/g, "\\~")
+      .replace(/`/g, "\\`")
+      .replace(/>/g, "\\>")
+      .replace(/#/g, "\\#")
+      .replace(/\+/g, "\\+")
+      .replace(/-/g, "\\-")
+      .replace(/=/g, "\\=")
+      .replace(/\|/g, "\\|")
+      .replace(/\{/g, "\\{")
+      .replace(/\}/g, "\\}")
+      .replace(/\./g, "\\.")
+      .replace(/!/g, "\\!");
   }
 
   // Event emitter for orchestrator
